@@ -1,6 +1,6 @@
 ---
 name: scrapekit
-version: 1.1.0
+version: 1.0.0
 description: |
   Proactive web scraping and document extraction router. Routes fetch/scrape tasks across webclaw, trafilatura, jina, playwright, tavily, apify, browser-harness, docling, searxng, and firecrawl based on source type, cost, and complexity. Use when user wants to fetch a URL, scrape a page, extract content from HTML/PDF/DOCX, convert to markdown or JSON, crawl a site, search the web, scrape social media (Instagram, TikTok, YouTube, LinkedIn, Twitter/X, Facebook, Reddit, Google Maps), scrape e-commerce (Amazon, Google Shopping), or needs full browser rendering. Triggers on: "fetch", "scrape", "get the page", "extract from", "convert to markdown", "crawl", "search the web", "parse PDF", "render page", "scrape instagram/tiktok/youtube/linkedin/twitter/facebook/reddit/amazon". Proactively picks the cheapest/fastest tool that can handle the job.
 allowed-tools:
@@ -39,8 +39,6 @@ Have a URL:
   YouTube                              →  apify youtube-scraper  →  jina (17k tok, only generic option)
   gumroad.com                          →  jina directly (trafilatura errors, webclaw bot-blocked)
   Article / Wikipedia / static docs    →  trafilatura (3-5x fewer tokens than others)
-  Medium / paywalled Medium domain      →  Freedium via WebFetch  →  freedium-mirror.cfd  →  generic paywall bypass
-  Paywalled article (non-Medium)        →  12ft.io via WebFetch  →  archive.today (playwright)  →  removepaywalls.com (playwright)
   Quick lookup / SPA / React / Notion  →  webclaw (fastest: 35-850ms)
   GitHub repo                          →  playwright (webclaw thin on GitHub)
   All above failed / JS SPA stuck      →  jina  →  tavily (1k credits/month)  →  firecrawl (last resort)
@@ -62,8 +60,6 @@ Have a URL:
 
 ```
 article / docs / Wikipedia:   trafilatura → webclaw → jina → tavily → firecrawl
-Medium / paywalled Medium:    Freedium (WebFetch) → freedium-mirror.cfd → generic paywall bypass
-paywalled article (non-Medium): 12ft.io (WebFetch) → archive.today (playwright) → removepaywalls.com (playwright)
 GitHub repo:                  playwright → jina → tavily → firecrawl
 SPA / React / Notion:         webclaw → playwright → jina → firecrawl
 YouTube / bot wall:           apify (streamers/youtube-scraper) → jina → firecrawl
@@ -79,8 +75,6 @@ search (no URL):              searxng → jina search → firecrawl search
 
 | Content | Tool | Why |
 |---|---|---|
-| Medium / paywalled Medium domain | Freedium via WebFetch → freedium-mirror.cfd → remove-paywall fallback | free mirror, no auth needed |
-| Paywalled article (NYT, WSJ, etc.) | 12ft.io (WebFetch) → archive.today (playwright) | see remove-paywall.md |
 | Wikipedia / long article | trafilatura | 24k tok vs 47-86k for others |
 | Static docs, blogs | trafilatura | 3-5x token efficiency |
 | Pricing / marketing (SSR) | trafilatura | 418 tok vs 980-2400 |
@@ -150,5 +144,3 @@ Detailed usage, commands, and install instructions:
 - `references/docling.md` — PDF/DOCX/PPTX
 - `references/crawl4ai.md` — async Python crawler (underperforms in practice)
 - `references/benchmark.md` — 10-site benchmark results
-- `references/medium.md` — Medium paywall bypass (Freedium, archive.today, service priority)
-- `references/remove-paywall.md` — generic paywall bypass for any publisher (12ft.io, archive.today, RemovePaywalls, publisher notes)

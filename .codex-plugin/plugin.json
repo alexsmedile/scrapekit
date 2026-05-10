@@ -3,6 +3,7 @@
   "version": "1.2.0",
   "description": "Proactive web scraping and document extraction router. Routes fetch/scrape tasks across webclaw, trafilatura, jina, playwright, tavily, apify, docling, searxng, and firecrawl based on source type, cost, and complexity.",
   "skills": "./skills/",
+  "hooks": "./hooks/hooks-codex.json",
   "interface": {
     "displayName": "scrapekit",
     "shortDescription": "Smart web scraping router — picks the cheapest/fastest tool for any URL or doc type.",

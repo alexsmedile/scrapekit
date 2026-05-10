@@ -10,30 +10,43 @@ set -uo pipefail
 
 SETUP_FILE=".scrapekit/setup.json"
 RECHECK=false
-[[ "${1:-}" == "--recheck" ]] && RECHECK=true
+QUIET=false
+for arg in "${@:-}"; do
+  [[ "$arg" == "--recheck" ]] && RECHECK=true
+  [[ "$arg" == "--quiet" ]]   && QUIET=true
+done
 
 mkdir -p .scrapekit
 
 # ── Colors ────────────────────────────────────────────────────────────────────
 GREEN='\033[0;32m'; YELLOW='\033[1;33m'; RED='\033[0;31m'; RESET='\033[0m'
-ok()   { echo -e "  ${GREEN}✓${RESET}  $*"; }
-warn() { echo -e "  ${YELLOW}!${RESET}  $*"; }
-fail() { echo -e "  ${RED}✗${RESET}  $*"; }
+ok()   { [[ "$QUIET" != true ]] && echo -e "  ${GREEN}✓${RESET}  $*" || true; }
+warn() { [[ "$QUIET" != true ]] && echo -e "  ${YELLOW}!${RESET}  $*" || true; }
+fail() { [[ "$QUIET" != true ]] && echo -e "  ${RED}✗${RESET}  $*" || true; }
+sep()  { [[ "$QUIET" != true ]] && echo "" || true; }
 
 # ── Skip if already verified ──────────────────────────────────────────────────
 if [[ "$RECHECK" == false && -f "$SETUP_FILE" ]]; then
-  echo ""
-  echo "scrapekit already set up ($(cat "$SETUP_FILE" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('date','unknown'))" 2>/dev/null || echo "unknown date"))."
-  echo "Run with --recheck to re-run the health check."
-  echo ""
+  PREV_DATE=$(python3 -c "import sys,json; d=json.load(open('$SETUP_FILE')); print(d.get('date','unknown'))" 2>/dev/null || echo "unknown date")
+  PREV_ISSUES=$(python3 -c "import sys,json; d=json.load(open('$SETUP_FILE')); print(len(d.get('issues',[])))" 2>/dev/null || echo "?")
+  if [[ "$QUIET" == true ]]; then
+    [[ "$PREV_ISSUES" == "0" ]] && echo "OK (cached $PREV_DATE)" || echo "ISSUES: $PREV_ISSUES (cached $PREV_DATE — run --recheck to refresh)"
+  else
+    echo ""
+    echo "scrapekit already set up ($PREV_DATE)."
+    echo "Run with --recheck to re-run the health check."
+    echo ""
+  fi
   exit 0
 fi
 
-echo ""
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "  scrapekit setup"
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo ""
+if [[ "$QUIET" != true ]]; then
+  echo ""
+  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+  echo "  scrapekit setup"
+  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+  echo ""
+fi
 
 ISSUES=()
 STATUS="{}"
@@ -54,7 +67,7 @@ check_python_import() {
 }
 
 # ── 1. trafilatura ────────────────────────────────────────────────────────────
-echo "[ trafilatura ]"
+[[ "$QUIET" != true ]] && echo "[ trafilatura ]"
 if check_binary trafilatura; then
   :
 elif check_python_import trafilatura; then
@@ -64,10 +77,10 @@ else
   warn "Install: pip install trafilatura"
   ISSUES+=("trafilatura: pip install trafilatura")
 fi
-echo ""
+sep
 
 # ── 2. webclaw ────────────────────────────────────────────────────────────────
-echo "[ webclaw ]"
+[[ "$QUIET" != true ]] && echo "[ webclaw ]"
 if check_binary webclaw; then
   :
 else
@@ -75,10 +88,10 @@ else
   warn "Install: cargo install --git https://github.com/0xMassi/webclaw.git webclaw-cli"
   ISSUES+=("webclaw: cargo install --git https://github.com/0xMassi/webclaw.git webclaw-cli")
 fi
-echo ""
+sep
 
 # ── 3. playwright ─────────────────────────────────────────────────────────────
-echo "[ playwright ]"
+[[ "$QUIET" != true ]] && echo "[ playwright ]"
 if check_python_import playwright; then
   ok "playwright (python module)"
   if python3 -c "
@@ -97,10 +110,10 @@ else
   warn "Install: pip install playwright && playwright install chromium"
   ISSUES+=("playwright: pip install playwright && playwright install chromium")
 fi
-echo ""
+sep
 
 # ── 4. docling ────────────────────────────────────────────────────────────────
-echo "[ docling ]"
+[[ "$QUIET" != true ]] && echo "[ docling ]"
 if check_python_import docling; then
   ok "docling (python module)"
 elif check_binary docling; then
@@ -110,10 +123,10 @@ else
   warn "Install: pip install docling"
   ISSUES+=("docling: pip install docling")
 fi
-echo ""
+sep
 
 # ── 5. browser-harness ────────────────────────────────────────────────────────
-echo "[ browser-harness ]"
+[[ "$QUIET" != true ]] && echo "[ browser-harness ]"
 if check_binary browser-harness; then
   :
 else
@@ -121,10 +134,10 @@ else
   warn "See: references/browser-harness.md for install instructions"
   ISSUES+=("browser-harness: see references/browser-harness.md")
 fi
-echo ""
+sep
 
 # ── 6. searxng (Docker) ───────────────────────────────────────────────────────
-echo "[ searxng ]"
+[[ "$QUIET" != true ]] && echo "[ searxng ]"
 if command -v docker &>/dev/null; then
   ok "docker — $(docker --version 2>/dev/null | head -1)"
   if curl -sf --max-time 3 "http://localhost:8080/search?q=test&format=json" &>/dev/null; then
@@ -139,13 +152,12 @@ else
   warn "Install Docker Desktop or run searxng another way"
   ISSUES+=("searxng: docker not found — install Docker Desktop")
 fi
-echo ""
+sep
 
 # ── 7. jina ───────────────────────────────────────────────────────────────────
-echo "[ jina ]"
+[[ "$QUIET" != true ]] && echo "[ jina ]"
 if [[ -n "${JINA_API_KEY:-}" ]]; then
   ok "JINA_API_KEY set"
-  # Validate key with a minimal request
   STATUS_CODE=$(curl -sf -o /dev/null -w "%{http_code}" --max-time 5 \
     "https://r.jina.ai/https://example.com" \
     -H "Authorization: Bearer $JINA_API_KEY" 2>/dev/null || echo "000")
@@ -161,10 +173,10 @@ else
   warn "Get a free key (500 RPM + 10M tokens): https://jina.ai"
   warn "Set: export JINA_API_KEY=your_key"
 fi
-echo ""
+sep
 
 # ── 8. apify ──────────────────────────────────────────────────────────────────
-echo "[ apify ]"
+[[ "$QUIET" != true ]] && echo "[ apify ]"
 if check_binary apify; then
   if [[ -n "${APIFY_TOKEN:-}" ]]; then
     ok "APIFY_TOKEN set"
@@ -183,10 +195,10 @@ else
     ISSUES+=("apify: export APIFY_TOKEN=your_token  # https://apify.com/sign-up")
   fi
 fi
-echo ""
+sep
 
 # ── 9. tavily ─────────────────────────────────────────────────────────────────
-echo "[ tavily ]"
+[[ "$QUIET" != true ]] && echo "[ tavily ]"
 if [[ -n "${TAVILY_API_KEY:-}" ]]; then
   ok "TAVILY_API_KEY set"
   if check_python_import tavily; then
@@ -202,10 +214,10 @@ else
   warn "Set: export TAVILY_API_KEY=your_key"
   ISSUES+=("tavily: export TAVILY_API_KEY=your_key  # https://app.tavily.com")
 fi
-echo ""
+sep
 
 # ── 10. firecrawl ─────────────────────────────────────────────────────────────
-echo "[ firecrawl ]"
+[[ "$QUIET" != true ]] && echo "[ firecrawl ]"
 if check_binary firecrawl; then
   if [[ -n "${FIRECRAWL_API_KEY:-}" ]]; then
     ok "FIRECRAWL_API_KEY set"
@@ -220,20 +232,31 @@ else
   warn "Install: npm install -g @mendable/firecrawl-js  OR  pip install firecrawl-py"
   ISSUES+=("firecrawl: npm install -g @mendable/firecrawl-js")
 fi
-echo ""
+sep
 
 # ── Summary ───────────────────────────────────────────────────────────────────
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-if [[ ${#ISSUES[@]} -eq 0 ]]; then
-  echo -e "  ${GREEN}All tools ready.${RESET}"
+if [[ "$QUIET" == true ]]; then
+  if [[ ${#ISSUES[@]} -eq 0 ]]; then
+    echo "OK"
+  else
+    echo "ISSUES: ${#ISSUES[@]}"
+    for issue in "${ISSUES[@]}"; do
+      echo "  → $issue"
+    done
+  fi
 else
-  echo -e "  ${YELLOW}${#ISSUES[@]} item(s) need attention:${RESET}"
+  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+  if [[ ${#ISSUES[@]} -eq 0 ]]; then
+    echo -e "  ${GREEN}All tools ready.${RESET}"
+  else
+    echo -e "  ${YELLOW}${#ISSUES[@]} item(s) need attention:${RESET}"
+    echo ""
+    for issue in "${ISSUES[@]}"; do
+      echo -e "  ${YELLOW}→${RESET}  $issue"
+    done
+  fi
   echo ""
-  for issue in "${ISSUES[@]}"; do
-    echo -e "  ${YELLOW}→${RESET}  $issue"
-  done
 fi
-echo ""
 
 # ── Save setup.json ───────────────────────────────────────────────────────────
 DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
@@ -252,6 +275,8 @@ data = {
 print(json.dumps(data, indent=2))
 " > "$SETUP_FILE"
 
-echo "  Setup state saved to $SETUP_FILE"
-echo "  Run with --recheck to re-run at any time."
-echo ""
+if [[ "$QUIET" != true ]]; then
+  echo "  Setup state saved to $SETUP_FILE"
+  echo "  Run with --recheck to re-run at any time."
+  echo ""
+fi

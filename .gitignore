@@ -7,3 +7,5 @@ _backups/
 *.zip
 .scrapekit/
 .claude/
+TODO.md
+FEEDBACKS.md

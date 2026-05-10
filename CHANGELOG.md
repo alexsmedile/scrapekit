@@ -5,6 +5,19 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ---
 
+## [1.2.0] — 2026-05-10
+
+### Added
+- `references/medium.md` — Medium paywall bypass guide: Freedium, freedium-mirror.cfd, archive.today, RemovePaywalls, ReadMedium; service priority table, URL encoding, Medium-hosted domain list, escalation chain
+- `references/remove-paywall.md` — generic paywall bypass for any publisher (NYT, WSJ, Bloomberg, etc.); covers 12ft.io, archive.today, Outline.com, RemovePaywalls with per-service details, publisher-specific notes, and escalation chain
+
+### Changed
+- Routing table: Medium and generic paywalled-article entries added with dedicated escalation paths
+- `references/medium.md` escalation chain now falls through to `remove-paywall.md` when all Freedium options fail
+- `SKILL.md` version bumped to 1.1.0
+
+---
+
 ## [1.1.0] — 2026-05-10
 
 ### Added

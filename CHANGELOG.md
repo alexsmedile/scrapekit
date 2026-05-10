@@ -5,6 +5,14 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ---
 
+## [1.4.0] — 2026-05-10
+
+### Added
+- `references/smart-review.md` — failure analysis workflow: reads `.scrapekit/session.log` for `err`/`thin` entries, cross-references current chat history, produces a structured per-failure report (target, tool, hypothesis, suggested fix, confidence level), then asks user to save locally or open a GitHub issue upstream
+- Trigger added to `SKILL.md`: "smart review", "review failures", "what went wrong"
+
+---
+
 ## [1.3.0] — 2026-05-10
 
 ### Added

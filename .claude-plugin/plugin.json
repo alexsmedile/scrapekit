@@ -1,0 +1,12 @@
+{
+  "name": "scrapekit",
+  "version": "1.0.0",
+  "description": "Proactive web scraping and document extraction router. Routes fetch/scrape tasks across webclaw, trafilatura, jina, playwright, tavily, apify, docling, searxng, and firecrawl based on source type, cost, and complexity.",
+  "author": {
+    "name": "Alessandro Smedile"
+  },
+  "homepage": "https://github.com/alexsmedile/scrapekit",
+  "repository": "https://github.com/alexsmedile/scrapekit",
+  "license": "MIT",
+  "keywords": ["scraping", "web-scraping", "trafilatura", "webclaw", "playwright", "jina", "firecrawl", "apify", "docling", "claude-code", "scrapekit", "skills"]
+}

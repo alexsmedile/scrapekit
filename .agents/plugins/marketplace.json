@@ -1,0 +1,16 @@
+{
+  "name": "scrapekit",
+  "interface": {
+    "displayName": "scrapekit"
+  },
+  "plugins": [
+    {
+      "name": "scrapekit",
+      "source": {
+        "source": "local",
+        "path": "../../"
+      },
+      "category": "Productivity"
+    }
+  ]
+}

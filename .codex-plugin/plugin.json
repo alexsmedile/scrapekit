@@ -1,0 +1,23 @@
+{
+  "name": "scrapekit",
+  "version": "1.0.0",
+  "description": "Proactive web scraping and document extraction router. Routes fetch/scrape tasks across webclaw, trafilatura, jina, playwright, tavily, apify, docling, searxng, and firecrawl based on source type, cost, and complexity.",
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "scrapekit",
+    "shortDescription": "Smart web scraping router — picks the cheapest/fastest tool for any URL or doc type.",
+    "longDescription": "scrapekit is a proactive routing layer for web scraping and document extraction. It automatically selects the best tool (webclaw, trafilatura, jina, playwright, apify, docling, firecrawl, searxng, browser-harness, tavily) based on content type, cost, and complexity. Handles articles, SPAs, PDFs, social media, e-commerce, YouTube, and login-gated pages. Always tries local free tools first, escalates to external APIs only on failure.",
+    "developerName": "Alessandro Smedile",
+    "category": "Productivity",
+    "capabilities": ["Read", "Bash"],
+    "websiteURL": "https://github.com/alexsmedile/scrapekit",
+    "defaultPrompt": [
+      "Scrape this page and extract the main content",
+      "Fetch this URL and convert it to markdown",
+      "Search the web for recent news about X",
+      "Extract text from this PDF",
+      "Scrape the Instagram profile at this URL"
+    ],
+    "brandColor": "#1a1a2e"
+  }
+}

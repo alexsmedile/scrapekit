@@ -5,14 +5,14 @@
   },
   "metadata": {
     "description": "Proactive web scraping and document extraction router. Routes fetch/scrape tasks across webclaw, trafilatura, jina, playwright, tavily, apify, docling, searxng, and firecrawl based on source type, cost, and complexity.",
-    "version": "1.4.0"
+    "version": "1.4.1"
   },
   "plugins": [
     {
       "name": "scrapekit",
       "source": "./",
       "description": "Proactive web scraping and document extraction router. Routes fetch/scrape tasks across webclaw, trafilatura, jina, playwright, tavily, apify, docling, searxng, and firecrawl based on source type, cost, and complexity.",
-      "version": "1.4.0",
+      "version": "1.4.1",
       "author": {
         "name": "Alessandro Smedile"
       },

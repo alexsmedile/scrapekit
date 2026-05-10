@@ -5,6 +5,13 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ---
 
+## [1.4.1] — 2026-05-10
+
+### Added
+- `scripts/hooks/pre-commit` + `scripts/hooks/.git-guard.json` — git-guard pre-commit hook: checks all 8 version sources (plugin manifests, README badge, CHANGELOG top entry, git tag, `SKILL.md`) on every commit and blocks if any are out of sync; configured via skizl git-guard
+
+---
+
 ## [1.4.0] — 2026-05-10
 
 ### Added

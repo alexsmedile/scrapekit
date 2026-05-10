@@ -8,7 +8,7 @@
       "name": "scrapekit",
       "source": {
         "source": "local",
-        "path": "../../"
+        "path": "../../plugins/scrapekit"
       },
       "category": "Productivity"
     }

@@ -5,6 +5,20 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ---
 
+## [1.3.0] — 2026-05-10
+
+### Added
+- `hooks/hooks.json` + `hooks/hooks-codex.json` — PostToolUse hook logs every WebFetch and Bash call to `.scrapekit/session.log` (async, zero token cost)
+- `scripts/log-tool-use.sh` — session logger: records timestamp, status (`ok` / `thin` / `err`), tool name, and URL or command; `thin` catches bot-blocks that return HTTP 200 with near-empty content
+- `references/setup.md` — full onboarding detail (permissions JSON, API keys, install commands) moved out of `SKILL.md` to keep the main skill file lean
+- `setup.sh --quiet` mode — machine-readable single-line output (`OK` or `ISSUES: n`) for Claude consumption; verbose mode unchanged for terminal use
+
+### Changed
+- Repo layout flattened: `agents/`, `skills/`, `.codex-plugin/`, `README.md` moved from `plugins/scrapekit/` to repo root as real directories — symlinks removed; layout is now GitHub-publishable without symlink resolution
+- `SKILL.md` setup section trimmed to 5 lines pointing to `references/setup.md`; setup script runs only when something breaks, not proactively on every session
+
+---
+
 ## [1.2.0] — 2026-05-10
 
 ### Added

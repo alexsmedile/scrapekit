@@ -1,6 +1,6 @@
 {
   "name": "scrapekit",
-  "version": "1.2.0",
+  "version": "1.4.0",
   "description": "Proactive web scraping and document extraction router. Routes fetch/scrape tasks across webclaw, trafilatura, jina, playwright, tavily, apify, docling, searxng, and firecrawl based on source type, cost, and complexity.",
   "author": {
     "name": "Alessandro Smedile"

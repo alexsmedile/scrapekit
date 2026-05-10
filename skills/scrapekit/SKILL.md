@@ -121,6 +121,10 @@ Output is either `OK` (all tools ready) or `ISSUES: n` followed by a fix list. O
 
 When the user says "setup scrapekit", "check my tools", or "onboard", run the script and report the output. For full install instructions and permissions setup, read `references/setup.md`.
 
+## Smart review
+
+When the user says "smart review", "review failures", "what went wrong", or "review my scraping session", read `references/smart-review.md` and follow the process there.
+
 ## Compare tool
 
 Run all tools against a URL, see tokens/timing/cost side-by-side:
@@ -146,3 +150,4 @@ bash "${CLAUDE_SKILL_DIR}/scripts/compare.sh" "https://example.com"
 - `references/benchmark.md` — 10-site benchmark results
 - `references/medium.md` — Medium paywall bypass (Freedium, archive.today, service priority)
 - `references/remove-paywall.md` — generic paywall bypass for any publisher (12ft.io, archive.today, RemovePaywalls, publisher notes)
+- `references/smart-review.md` — failure analysis: reads session.log + chat history, produces structured report, files GitHub issue or saves locally

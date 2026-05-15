@@ -1,7 +1,7 @@
 # scrapekit
 
 ![License](https://img.shields.io/badge/license-MIT-blue)
-![Version](https://img.shields.io/badge/version-1.4.1-green)
+![Version](https://img.shields.io/badge/version-1.4.2-green)
 ![Claude Code](https://img.shields.io/badge/Claude%20Code-skill%20%2B%20plugin-blueviolet)
 
 The web scraping router for Claude Code. Picks the right tool automatically — trafilatura for articles, webclaw for SPAs, apify for social media — based on content type, not guesswork. **3–5× fewer tokens** than one-tool approaches. Local tools always run first; API credits are a last resort.
@@ -103,14 +103,14 @@ Runs all tools against a URL and opens a tabbed HTML viewer with tokens, timing,
 
 ## Install
 
-### Claude Code plugin (skill + agents)
+### Claude Code — marketplace
 
 ```bash
 /plugin marketplace add alexsmedile/scrapekit
 /plugin install scrapekit@scrapekit
 ```
 
-Installs the skill and all three agents automatically.
+Installs the skill and all three agents automatically. Or open the interactive `/plugin` manager and browse from there.
 
 > **Permissions required for subagents**
 > The three agents (web-researcher, doc-fetcher, social-scraper) need pre-approved tool permissions to run without interrupting you. Add this block to your settings file after installing:
@@ -134,29 +134,34 @@ Installs the skill and all three agents automatically.
 >
 > If a `permissions` key already exists, merge the `allow` array.
 
-### npx skills
+### Codex — marketplace
+
+Fastest — one command, activates the plugin directly:
 
 ```bash
-# Global
-npx skills add alexsmedile/scrapekit
-
-# Project-scoped
-npx skills add alexsmedile/scrapekit --project
+npx codex-marketplace add alexsmedile/scrapekit --plugin
 ```
 
-### Codex
+Or via the built-in plugin manager:
 
 ```bash
 codex plugin marketplace add alexsmedile/scrapekit
 # then: codex /plugins → browse and install
 ```
 
-### Manual
+### npx skills
 
 ```bash
-# Plugin (skill + agents)
+npx skills add alexsmedile/scrapekit             # global
+npx skills add alexsmedile/scrapekit --project   # project-scoped
+```
+
+### Test locally (no install)
+
+```bash
 git clone https://github.com/alexsmedile/scrapekit
-claude --plugin-dir ./scrapekit
+claude --plugin-dir ./scrapekit                  # Claude Code (plugin: skill + agents)
+npx codex-marketplace add ./scrapekit --plugin   # Codex
 
 # Skill only (no agents)
 git clone https://github.com/alexsmedile/scrapekit ~/.claude/skills/scrapekit

@@ -7,8 +7,6 @@ INPUT="${CLAUDE_TOOL_INPUT:-{}}"
 OUTPUT="${CLAUDE_TOOL_OUTPUT:-}"
 LOG=".scrapekit/session.log"
 
-mkdir -p .scrapekit
-
 # Extract URL or path depending on tool
 case "$TOOL" in
   WebFetch)
@@ -22,6 +20,8 @@ case "$TOOL" in
 esac
 
 [[ -z "$TARGET" ]] && exit 0
+
+mkdir -p .scrapekit
 
 # Determine status from output
 OUTPUT_TEXT=$(echo "$OUTPUT" | jq -r '.content // .output // .' 2>/dev/null || echo "$OUTPUT")

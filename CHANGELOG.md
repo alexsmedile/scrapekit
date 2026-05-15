@@ -5,6 +5,16 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ---
 
+## [1.4.2] — 2026-05-16
+
+### Fixed
+- `scripts/log-tool-use.sh` — moved `mkdir -p .scrapekit` to after the `[[ -z "$TARGET" ]]` guard; previously it ran unconditionally on every `WebFetch`/`Bash` hook call, creating an empty `.scrapekit/` folder even when there was nothing to log
+
+### Changed
+- `README.md` — reworked the Install section: separate Claude Code / Codex marketplace entries, `npx codex-marketplace` one-liner, and a "Test locally (no install)" block
+
+---
+
 ## [1.4.1] — 2026-05-10
 
 ### Added

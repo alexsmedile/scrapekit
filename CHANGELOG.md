@@ -5,6 +5,13 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ---
 
+## [1.4.3] — 2026-05-18
+
+### Fixed
+- `scripts/log-tool-use.sh` — the PostToolUse hook no longer creates ghost `.scrapekit/` folders in unrelated sessions. `mkdir -p` removed entirely; the hook now exits unless (a) a real `http(s)://` URL is present and (b) a `.scrapekit/` directory already exists. The directory is now the opt-in — scrapekit's `SKILL.md` creates it when invoked; the hook only ever appends to it
+
+---
+
 ## [1.4.2] — 2026-05-16
 
 ### Fixed

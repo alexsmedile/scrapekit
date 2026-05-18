@@ -7,21 +7,25 @@ INPUT="${CLAUDE_TOOL_INPUT:-{}}"
 OUTPUT="${CLAUDE_TOOL_OUTPUT:-}"
 LOG=".scrapekit/session.log"
 
-# Extract URL or path depending on tool
+# Extract a real http(s) URL — only URL-bearing activity is logged.
+# A bare Bash command with no URL is not scrapekit-related, so skip it
+# (this is what prevented the ghost .scrapekit/ folders).
 case "$TOOL" in
   WebFetch)
     TARGET=$(echo "$INPUT" | jq -r '.url // empty' 2>/dev/null) ;;
   Bash)
     CMD=$(echo "$INPUT" | jq -r '.command // empty' 2>/dev/null)
-    TARGET=$(echo "$CMD" | grep -oE 'https?://[^ "]+' | head -1)
-    [[ -z "$TARGET" ]] && TARGET=$(echo "$CMD" | cut -c1-80) ;;
+    TARGET=$(echo "$CMD" | grep -oE 'https?://[^ "]+' | head -1) ;;
   *)
-    TARGET=$(echo "$INPUT" | jq -r '.url // .path // .command // empty' 2>/dev/null | head -1 | cut -c1-80) ;;
+    TARGET=$(echo "$INPUT" | jq -r '.url // empty' 2>/dev/null) ;;
 esac
 
-[[ -z "$TARGET" ]] && exit 0
+# No URL → not a scrapekit-relevant call. Exit before any folder is created.
+[[ "$TARGET" =~ ^https?:// ]] || exit 0
 
-mkdir -p .scrapekit
+# Only log into a .scrapekit/ that already exists — never create one.
+# The directory is the opt-in: scrapekit's skill creates it when invoked.
+[[ -d .scrapekit ]] || exit 0
 
 # Determine status from output
 OUTPUT_TEXT=$(echo "$OUTPUT" | jq -r '.content // .output // .' 2>/dev/null || echo "$OUTPUT")

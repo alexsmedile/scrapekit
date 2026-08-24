@@ -3,6 +3,13 @@
 All notable changes are documented here.
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
+## [1.5.0] — 2026-08-25
+
+### Added
+- **Harness Native Baseline**: Documented Level 1 native retrieval tools across Claude Code (`WebFetch`), Antigravity (`read_url_content`), OpenClaw, Hermes, Codex, and Cursor before escalating.
+- **Fast Zero-Config Fallback**: Added instant proxy fallback (`curl -s https://r.jina.ai/<url>`) and local `trafilatura` fast extraction.
+- **Multi-Source Research Synthesis**: Added Tier 4 integration with `notebooklm-cli` (`nlm query`) for long-form synthesis across multiple scraped documents.
+
 ---
 
 ## [1.4.3] — 2026-05-18

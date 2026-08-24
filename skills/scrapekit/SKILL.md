@@ -1,6 +1,6 @@
 ---
 name: scrapekit
-version: 1.4.3
+version: 1.5.0
 description: |
   Proactive web scraping and document extraction router. Routes fetch/scrape tasks across webclaw, trafilatura, jina, playwright, tavily, apify, browser-harness, docling, searxng, and firecrawl based on source type, cost, and complexity. Use when user wants to fetch a URL, scrape a page, extract content from HTML/PDF/DOCX, convert to markdown or JSON, crawl a site, search the web, scrape social media (Instagram, TikTok, YouTube, LinkedIn, Twitter/X, Facebook, Reddit, Google Maps), scrape e-commerce (Amazon, Google Shopping), or needs full browser rendering. Triggers on: "fetch", "scrape", "get the page", "extract from", "convert to markdown", "crawl", "search the web", "parse PDF", "render page", "scrape instagram/tiktok/youtube/linkedin/twitter/facebook/reddit/amazon". Proactively picks the cheapest/fastest tool that can handle the job.
 allowed-tools:
@@ -24,13 +24,26 @@ allowed-tools:
 
 # scrapekit — routing guide
 
-**Default rule: local free tools first. External APIs only when local tools fail.**
+**Default rule: harness native or local free tools first. External APIs only when local tools fail.**
 
-## Routing
+## 1. Harness Native Tools Baseline
+
+| Harness | Native Fetch Tool | Native Search Tool | Native Browser Integration |
+|:---|:---|:---|:---|
+| **Claude Code** | `WebFetch` | `WebSearch` | `claude --chrome`, Playwright MCP |
+| **Antigravity / Gemini** | `read_url_content`, `read_browser_page` | `search_web` | Native `/browser`, CDP bridge |
+| **OpenClaw** | `web_fetch`, `fetch_url` | `web_search` | `webclaw` browser runner |
+| **Hermes** | `web_scrape`, curl | `web_search` | `browser_tool` |
+| **Codex** | CLI curl / python | MCP search | Sandboxed Playwright |
+| **Cursor** | `@docs`, `@web` | `@web` | Built-in web search |
+
+---
+
+## 2. Routing
 
 ```
 No URL yet (need to search)?
-  └─ searxng (local Docker, free)  →  jina search (s.jina.ai)  →  firecrawl search
+  └─ Harness Search (WebSearch / search_web)  →  searxng (local Docker)  →  jina search (s.jina.ai)  →  firecrawl search
 
 Have a URL:
   PDF / DOCX / PPTX / structured doc  →  docling
@@ -38,22 +51,26 @@ Have a URL:
   Social media / e-commerce / maps     →  apify (platform actor — generic scrapers blocked)
   YouTube                              →  apify youtube-scraper  →  jina (17k tok, only generic option)
   gumroad.com                          →  jina directly (trafilatura errors, webclaw bot-blocked)
-  Article / Wikipedia / static docs    →  trafilatura (3-5x fewer tokens than others)
-  Medium / paywalled Medium domain      →  Freedium via WebFetch  →  freedium-mirror.cfd  →  generic paywall bypass
-  Paywalled article (non-Medium)        →  12ft.io via WebFetch  →  archive.today (playwright)  →  removepaywalls.com (playwright)
-  Quick lookup / SPA / React / Notion  →  webclaw (fastest: 35-850ms)
+  Article / Wikipedia / static docs    →  Harness Native (WebFetch)  →  trafilatura (3-5x fewer tokens)
+  Medium / paywalled Medium domain     →  Freedium via WebFetch  →  freedium-mirror.cfd  →  generic paywall bypass
+  Paywalled article (non-Medium)       →  12ft.io via WebFetch  →  archive.today (playwright)  →  removepaywalls.com (playwright)
+  Quick lookup / SPA / React / Notion  →  curl https://r.jina.ai/<url>  →  webclaw (fast: 35-850ms)
   GitHub repo                          →  playwright (webclaw thin on GitHub)
   All above failed / JS SPA stuck      →  jina  →  tavily (1k credits/month)  →  firecrawl (last resort)
+
+Multi-source synthesis / research across scraped pages:
+  └─ notebooklm-cli / nlm (synthesize answers from long sources)
 ```
 
-**Failure signal:** < 200 tokens on a page that should have content → escalate.
+**Failure signal:** < 200 tokens on a page that should have content, or HTTP 403/429/Cloudflare → escalate.
 
-## Tool tiers
+## 3. Tool tiers
 
 | Tier | Tools |
 |---|---|
-| Local free | webclaw, webfetch, trafilatura, playwright+markdownify, crawl4ai, docling, searxng, browser-harness |
-| External free tier | jina (10M tokens/signup), tavily (1k/month), apify (generous per actor) |
+| Harness native & local free | native WebFetch/read_url_content, webclaw, trafilatura, playwright+markdownify, crawl4ai, docling, searxng, browser-harness |
+| Zero-config proxy & free API | jina proxy (r.jina.ai), jina API (10M tokens/signup), tavily (1k/month), apify (generous per actor) |
+| Multi-source research synthesis | notebooklm-cli / nlm query |
 | Credits last resort | firecrawl |
 
 **Credit awareness:** alert the user when credits are low or exhausted — jina, tavily, apify, and firecrawl all have limits. Check API error responses for quota signals and report them explicitly rather than failing silently.

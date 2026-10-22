@@ -3,6 +3,16 @@
 All notable changes are documented here.
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
+## [1.5.5] — 2026-10-22
+
+### Added
+- Media/transcript recovery protocol covering independent downloaders, observed direct resources, playback recordings, platform captions, local ASR and visual-only OCR.
+
+### Fixed
+- Instagram acquisition diagnoses session/API failures separately and allows one no-cookie retry for verified public sources.
+- Rate limits and challenges stop automatic fallback loops; YouTube page text is no longer treated as proof of a transcript.
+- Evidence qualification distinguishes readable files, reviewed coverage and live-tested versus merely available tools.
+
 ## [1.5.0] — 2026-08-25
 
 ### Added

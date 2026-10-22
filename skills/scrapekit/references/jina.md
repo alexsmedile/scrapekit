@@ -1,6 +1,10 @@
 # jina reader — free tier, JS rendering
 
-Only tool with real YouTube content (17k tok). Free: 20 RPM (no key), 500 RPM (free key). 10M tokens on signup.
+A page-reader alternative for YouTube page text and metadata. A historical
+benchmark returned 17k tokens; volume does not establish a complete transcript.
+Descriptions, comments and generated summaries are not spoken-content evidence.
+For captions/media use [media and transcript recovery](media-transcripts.md).
+Check current provider quotas before relying on historical free-tier limits.
 
 ```bash
 # Fetch

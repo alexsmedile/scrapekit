@@ -1,10 +1,10 @@
 # scrapekit
 
 ![License](https://img.shields.io/badge/license-MIT-blue)
-![Version](https://img.shields.io/badge/version-1.5.0-green)
+![Version](https://img.shields.io/badge/version-1.5.5-green)
 ![Claude Code](https://img.shields.io/badge/Claude%20Code-skill%20%2B%20plugin-blueviolet)
 
-The web scraping router for Claude Code. Picks the right tool automatically — trafilatura for articles, webclaw for SPAs, apify for social media — based on content type, not guesswork. **3–5× fewer tokens** than one-tool approaches. Local tools always run first; API credits are a last resort.
+The web scraping router for Claude Code. Picks the right tool automatically — trafilatura for articles, webclaw for SPAs, authenticated downloaders for Instagram, apify for other social media — based on content type, not guesswork. **3–5× fewer tokens** than one-tool approaches. Local tools always run first; API credits are a last resort.
 
 Includes three subagents that handle scraping tasks without triggering permission prompts.
 

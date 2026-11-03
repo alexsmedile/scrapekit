@@ -1,18 +1,20 @@
 # scrapekit — setup & onboarding
 
+Use this when: checking installed tool prerequisites. Resolve `SKILL_DIR` from the installed skill catalog before these commands.
+
 ## Health check
 
 Run to verify all tools and API keys:
 
 ```bash
 # Verbose (human-readable)
-bash "${CLAUDE_SKILL_DIR}/scripts/setup.sh"
+bash "${SKILL_DIR}/scripts/setup.sh"
 
 # Quiet (machine-readable — use this when Claude runs the check)
-bash "${CLAUDE_SKILL_DIR}/scripts/setup.sh" --quiet
+bash "${SKILL_DIR}/scripts/setup.sh" --quiet
 
 # Force re-check even if already run
-bash "${CLAUDE_SKILL_DIR}/scripts/setup.sh" --recheck
+bash "${SKILL_DIR}/scripts/setup.sh" --recheck
 ```
 
 Quiet output: `OK` if everything is ready, or `ISSUES: n` followed by a fix list. Results are cached to `.scrapekit/setup.json` — subsequent runs skip the check unless `--recheck` is passed.

@@ -1,5 +1,7 @@
 # tavily — 1k free credits/month
 
+Use this when: an authorized Tavily search or extraction route is selected.
+
 Clean LLM-ready extraction. 500–2000ms. Fails on YouTube and auth-gated pages.
 Requires `TAVILY_API_KEY` env var. Monitor at: https://app.tavily.com
 

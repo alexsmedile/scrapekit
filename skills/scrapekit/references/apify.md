@@ -1,5 +1,7 @@
 # apify — platform-specific scraping
 
+Use this when: using platform actors for social, commerce or maps extraction.
+
 Purpose-built actors for social media, e-commerce, maps. Generous free tier per actor.
 Requires `APIFY_TOKEN` env var.
 

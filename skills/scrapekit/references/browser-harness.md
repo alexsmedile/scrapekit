@@ -1,5 +1,7 @@
 # browser-harness — real Chrome, real session
 
+Use this when: a selected page needs an authorized real-browser session.
+
 Connects to user's running Chrome via CDP. Real cookies, real auth. Use for login-gated pages, bot-blocked sites, multi-step interactions.
 
 Full docs: `~/code/tools/browser-harness/SKILL.md`

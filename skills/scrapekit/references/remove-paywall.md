@@ -1,5 +1,9 @@
 # Remove Paywall — Generic Bypass
 
+Use this when: looking for an accessible copy of an article through the stated routes.
+
+On rate limits or challenges, stop automatic network fallbacks. Distinguish an ordinary unavailable/empty page before selecting another service.
+
 Generic strategies for fetching paywalled content from any publisher (NYT, WSJ, The Atlantic, Medium, Substack, etc.).
 
 ## Service Overview
@@ -23,7 +27,7 @@ Generic strategies for fetching paywalled content from any publisher (NYT, WSJ, 
 1. trafilatura / webclaw  →  (fails: paywalled / thin content)
 2. 12ft.io via WebFetch   →  (fails: blocked or empty)
 3. Outline.com via WebFetch  →  (fails: down or thin)
-4. Archive.today via playwright / browser-harness  →  (captcha: try next)
+4. Archive.today via playwright / browser-harness  →  (captcha: stop automatic attempts)
 5. RemovePaywalls via playwright / browser-harness  →  (fails: last resort)
 6. Manual: ask user to paste article text
 ```
@@ -36,7 +40,7 @@ For **Medium-specific** content: start from `references/medium.md` — Freedium 
 - Caches a snapshot of most public pages; often has pre-paywall copies
 - URL: `https://archive.today/latest/{raw_url}` — redirects to newest snapshot
 - Requires real browser (playwright or browser-harness) — WebFetch returns near-empty
-- May serve captcha: use browser-harness with a real Chrome session if playwright fails
+- May serve captcha: stop automatic attempts and report the challenge for normal user resolution
 - Alternative domains (same service): `archive.ph`, `archive.is`, `archive.li`, `archive.fo`
 
 ```bash
@@ -105,7 +109,7 @@ python3 -c "from urllib.parse import quote; print(quote('$URL', safe=''))"
 | Problem | Solution |
 |---|---|
 | 12ft.io returns thin/blocked page | Publisher detects proxy — try archive.today |
-| Archive.today captcha | Switch to browser-harness (real Chrome session) |
+| Archive.today captcha | Stop automatic attempts and report the challenge. |
 | Archive.today has no snapshot | Page not cached — try 12ft.io or RemovePaywalls |
 | Outline.com down | Skip to archive.today |
 | All services blocked | Ask user to paste article text directly |

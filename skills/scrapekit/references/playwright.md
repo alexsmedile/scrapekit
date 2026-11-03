@@ -1,5 +1,7 @@
 # playwright + markdownify — full browser rendering
 
+Use this when: the selected page needs browser rendering or interaction.
+
 Use when trafilatura returns empty / `<div id="root"></div>`. Slower (1.3–4.5s min), heavy, detectable by bots.
 
 ```bash

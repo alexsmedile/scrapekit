@@ -1,34 +1,27 @@
 ---
 name: scrapekit
-version: 1.5.5
+version: 1.6.0
 description: |
   Proactive web scraping and document extraction router. Routes fetch/scrape tasks across webclaw, trafilatura, jina, playwright, tavily, apify, browser-harness, docling, searxng, and firecrawl based on source type, cost, and complexity. Use when user wants to fetch a URL, scrape a page, extract content from HTML/PDF/DOCX, convert to markdown or JSON, crawl a site, search the web, scrape social media (Instagram, TikTok, YouTube, LinkedIn, Twitter/X, Facebook, Reddit, Google Maps), scrape e-commerce (Amazon, Google Shopping), or needs full browser rendering. Triggers on: "fetch", "scrape", "get the page", "extract from", "convert to markdown", "crawl", "search the web", "parse PDF", "render page", "scrape instagram/tiktok/youtube/linkedin/twitter/facebook/reddit/amazon". Proactively picks the cheapest/fastest tool that can handle the job.
-allowed-tools:
-  - WebFetch
-  - Bash(trafilatura*)
-  - Bash(docling*)
-  - Bash(playwright*)
-  - Bash(markdownify*)
-  - Bash(python3*)
-  - Bash(firecrawl*)
-  - Bash(mkdir*)
-  - Bash(head*)
-  - Bash(grep*)
-  - Bash(jq*)
-  - Bash(curl*)
-  - Bash(docker*)
-  - Bash(browser-harness*)
-  - Bash(webclaw*)
-  - Bash(apify*)
-  - Bash(gallery-dl*)
-  - Bash(yt-dlp*)
-  - Bash(ffmpeg*)
-  - Bash(ffprobe*)
+allowed-tools: ["WebFetch", "Bash(trafilatura*)", "Bash(docling*)", "Bash(playwright*)", "Bash(markdownify*)", "Bash(python3*)", "Bash(firecrawl*)", "Bash(mkdir*)", "Bash(head*)", "Bash(grep*)", "Bash(jq*)", "Bash(curl*)", "Bash(docker*)", "Bash(browser-harness*)", "Bash(webclaw*)", "Bash(apify*)", "Bash(gallery-dl*)", "Bash(yt-dlp*)", "Bash(ffmpeg*)", "Bash(ffprobe*)"]
 ---
 
 # scrapekit — routing guide
 
-**Default rule: harness native or local free tools first. External APIs only when local tools fail.**
+**Default rule: project-owned workflows first, then harness native or local free tools. External APIs only when local tools fail.**
+
+When the active project owns media acquisition, extraction or reference studies,
+enter that workflow before selecting a downloader. Its configured corpus, cache,
+contracts and writers remain authoritative. For example, Creator Studio reel
+studies enter Content Library's native acquisition workflow; invoking scrapekit
+does not replace it. Use this skill's standalone media helper only outside that
+owned route or for an explicitly selected capability gap, and return its evidence
+to the owning workflow rather than creating a second study/library.
+
+Resolve `SKILL_DIR` to this installed skill folder from the host's skill catalog;
+use that absolute location for bundled commands on every host. The skill is
+model-invoked on hosts supporting automatic discovery; explicit invocation also
+works. CLI helpers require Python 3.11+ and their declared installed tools.
 
 ## 1. Harness Native Tools Baseline
 
@@ -73,7 +66,10 @@ HTTP 403/login redirects, challenges, HTTP 429, TLS errors and timeouts are dist
 On rate limits (including `RequestBlocked`/`IpBlocked`) or challenges, stop automatic
 network fallbacks; do not rotate tools/accounts/proxies to repeat the blocked request.
 
-For video/audio requests, read [media and transcript recovery](references/media-transcripts.md).
+For video/audio or mixed-media requests, read [media and transcript recovery](references/media-transcripts.md).
+Its [executable capture route](references/media-transcripts.md#standalone-capture-and-extraction)
+provides bounded video download, local ordered-media validation, actual-timestamp
+frame extraction, optional audio and raw transcript preservation with stage receipts.
 Download, platform captions, local ASR and visual OCR are separate evidence routes.
 Select a fallback by failure type and prerequisites, not a fixed retry-all chain.
 Keep raw evidence, hashes, source identity, language, coverage and attempt history;
@@ -198,7 +194,7 @@ mkdir -p .scrapekit
 If a tool fails unexpectedly or a subagent reports missing permissions, run the health check in quiet mode:
 
 ```bash
-bash "${CLAUDE_SKILL_DIR}/scripts/setup.sh" --quiet
+bash "${SKILL_DIR}/scripts/setup.sh" --quiet
 ```
 
 Output is either `OK` (all tools ready) or `ISSUES: n` followed by a fix list. Only run this when something breaks — not proactively on every session.
@@ -214,7 +210,7 @@ When the user says "smart review", "review failures", "what went wrong", or "rev
 Run all tools against a URL, see tokens/timing/cost side-by-side:
 
 ```bash
-bash "${CLAUDE_SKILL_DIR}/scripts/compare.sh" "https://example.com"
+bash "${SKILL_DIR}/scripts/compare.sh" "https://example.com"
 ```
 
 ## References

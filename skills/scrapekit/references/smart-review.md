@@ -1,10 +1,20 @@
 # smart-review — scraping failure analysis
 
+Use this when: the user requests review of a scraping session.
+
 Triggered when the user asks for a "smart review", "review failures", "what went wrong", or similar.
 
 ## Process
 
-### 1. Read the session log
+### 1. Sanitize and read the session log
+
+Before displaying historic logs or building any shareable report, remove URL
+credentials, queries and fragments, tokens, raw headers and private paths. The
+hook sanitizes new targets only; it cannot certify old entries. Use bounded
+sanitized extracts in chat. GitHub submission requires explicit user instruction
+and a reviewed sanitized report; never attach the raw session log.
+
+### Local inspection (private)
 
 ```bash
 cat .scrapekit/session.log 2>/dev/null || echo "No session log found."

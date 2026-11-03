@@ -1,5 +1,7 @@
 # docling — PDF / DOCX / PPTX / structured docs
 
+Use this when: extracting structured documents with Docling.
+
 ```bash
 docling file.pdf
 docling file.pdf --output .scrapekit/

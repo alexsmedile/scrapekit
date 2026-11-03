@@ -3,6 +3,17 @@
 All notable changes are documented here.
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
+## [1.6.0] — 2026-11-04
+
+### Added
+- Portable media capture with bounded downloads, validated local media, timestamped frames, audio, optional local Whisper and OCR, and readable evidence receipts.
+- Regression fixtures covering multi-stream media, failure preservation, extraction provenance and private output handling.
+
+### Fixed
+- Project-owned acquisition workflows take precedence over generic scraping routes.
+- Comparison commands treat URLs as data, stop on rate limits and challenges, and retain private diagnostics; session logs sanitize URL credentials and tracking.
+- Tool setup resolves the installed skill across hosts, and local search startup has bounded readiness checks and ownership-aware cleanup.
+
 ## [1.5.5] — 2026-10-22
 
 ### Added

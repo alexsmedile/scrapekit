@@ -1,5 +1,7 @@
 # Benchmark — 10 real sites, 8 tools
 
+Use this when: comparing observed extraction cost, speed and coverage.
+
 Tokens = cl100k_base (same as Claude context cost).
 
 | Site | Type | webfetch | trafilatura | jina | playwright | crawl4ai | webclaw | tavily |

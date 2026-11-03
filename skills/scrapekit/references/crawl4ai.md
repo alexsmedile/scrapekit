@@ -1,5 +1,7 @@
 # crawl4ai — async Python crawler
 
+Use this when: the chosen extraction route needs Crawl4AI rendering.
+
 Slower and noisier than playwright+markdownify in benchmarks. Use only if you need crawl4ai's LLM-extraction hooks specifically.
 
 ```python

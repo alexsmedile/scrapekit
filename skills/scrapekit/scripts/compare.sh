@@ -5,15 +5,23 @@
 # Tools: webfetch, trafilatura, jina, playwright, firecrawl, crawl4ai, webclaw, tavily
 
 set -euo pipefail
+umask 077
 
 URL="${1:?Usage: compare.sh <url>}"
 SLUG=$(echo "$URL" | sed 's|https\?://||;s|[^a-zA-Z0-9]|-|g;s|-\+|-|g;s|^-||;s|-$||' | cut -c1-60)
 OUT_DIR=".scrapekit/compare/${SLUG}"
 HTML="$OUT_DIR/compare.html"
+export SCRAPEKIT_URL="$URL" SCRAPEKIT_OUT="$OUT_DIR"
+DISPLAY_URL=$(python3 - "$URL" <<'PYURL'
+import html,sys
+from urllib.parse import urlsplit,urlunsplit
+u=urlsplit(sys.argv[1]); print(html.escape(urlunsplit((u.scheme,u.hostname or "",u.path,"",""))))
+PYURL
+)
 
 mkdir -p "$OUT_DIR"
 
-echo "==> URL: $URL"
+echo "==> URL: $DISPLAY_URL"
 echo ""
 
 # --- Timing helper (macOS-compatible milliseconds via python3) ---
@@ -35,44 +43,39 @@ read_time() { cat "$OUT_DIR/$1.time" 2>/dev/null || echo "0"; }
 
 run_webfetch() {
   echo "[1/8] webfetch (curl + markdownify)..."
-  timed_run webfetch bash -c "
-    curl -sL --max-time 15 \
-      -A 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36' \
-      '$URL' | python3 -c \"
+  timed_run webfetch bash -c '    curl --fail-with-body -sL -D "$SCRAPEKIT_OUT/response.headers.local" --max-time 15 \
+      -A '"'"'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36'"'"' \
+      "$SCRAPEKIT_URL" | python3 -c "
 import sys
 from markdownify import markdownify
 print(markdownify(sys.stdin.read()))
-\" > '$OUT_DIR/webfetch.md' 2>/dev/null || echo '(failed)' > '$OUT_DIR/webfetch.md'
-  "
+" > "$SCRAPEKIT_OUT/webfetch.md" 2>"$SCRAPEKIT_OUT/runner.error.local.log" || echo '"'"'(failed)'"'"' > "$SCRAPEKIT_OUT/webfetch.md"'
 }
 
 run_trafilatura() {
   echo "[2/8] trafilatura..."
-  timed_run trafilatura bash -c "
-    trafilatura -u '$URL' --output-format markdown \
-      > '$OUT_DIR/trafilatura.md' 2>/dev/null || echo '(failed or empty)' > '$OUT_DIR/trafilatura.md'
-    [ -s '$OUT_DIR/trafilatura.md' ] || echo '(empty output)' > '$OUT_DIR/trafilatura.md'
-  "
+  timed_run trafilatura bash -c '    trafilatura -u "$SCRAPEKIT_URL" --output-format markdown \
+      > "$SCRAPEKIT_OUT/trafilatura.md" 2>"$SCRAPEKIT_OUT/runner.error.local.log" || echo '"'"'(failed or empty)'"'"' > "$SCRAPEKIT_OUT/trafilatura.md"
+    [ -s "$SCRAPEKIT_OUT/trafilatura.md" ] || echo '"'"'(empty output)'"'"' > "$SCRAPEKIT_OUT/trafilatura.md"'
 }
 
 run_jina() {
   echo "[3/8] jina reader..."
-  timed_run jina bash -c "
-    if [ -n '${JINA_API_KEY:-}' ]; then
-      curl -s --max-time 30 'https://r.jina.ai/$URL' \
-        -H 'Authorization: Bearer ${JINA_API_KEY:-}' \
-        > '$OUT_DIR/jina.md' 2>/dev/null || echo '(failed)' > '$OUT_DIR/jina.md'
+  timed_run jina bash -c '    if [ -n "${JINA_API_KEY:-}" ]; then
+      curl --fail-with-body -s -D "$SCRAPEKIT_OUT/response.headers.local" --max-time 30 "https://r.jina.ai/$SCRAPEKIT_URL" \
+        -H "Authorization: Bearer ${JINA_API_KEY:-}" \
+        > "$SCRAPEKIT_OUT/jina.md" 2>"$SCRAPEKIT_OUT/runner.error.local.log" || echo '"'"'(failed)'"'"' > "$SCRAPEKIT_OUT/jina.md"
     else
-      curl -s --max-time 30 'https://r.jina.ai/$URL' \
-        > '$OUT_DIR/jina.md' 2>/dev/null || echo '(failed)' > '$OUT_DIR/jina.md'
+      curl --fail-with-body -s -D "$SCRAPEKIT_OUT/response.headers.local" --max-time 30 "https://r.jina.ai/$SCRAPEKIT_URL" \
+        > "$SCRAPEKIT_OUT/jina.md" 2>"$SCRAPEKIT_OUT/runner.error.local.log" || echo '"'"'(failed)'"'"' > "$SCRAPEKIT_OUT/jina.md"
     fi
-    [ -s '$OUT_DIR/jina.md' ] || echo '(empty output)' > '$OUT_DIR/jina.md'
-  "
+    [ -s "$SCRAPEKIT_OUT/jina.md" ] || echo '"'"'(empty output)'"'"' > "$SCRAPEKIT_OUT/jina.md"'
 }
 
 run_playwright() {
   echo "[4/8] playwright + markdownify..."
-  timed_run playwright python3 - <<EOF
+  timed_run playwright python3 - <<'EOF'
+import os
 from playwright.sync_api import sync_playwright
 from markdownify import markdownify
 import sys
@@ -80,13 +83,13 @@ try:
     with sync_playwright() as p:
         browser = p.chromium.launch()
         page = browser.new_page()
-        page.goto("$URL", wait_until="networkidle", timeout=30000)
-        md = markdownify(page.content())
+        response = page.goto(os.environ["SCRAPEKIT_URL"], wait_until="networkidle", timeout=30000)
+        md = "HTTP " + str(response.status if response else "unknown") + "\n" + markdownify(page.content())
         browser.close()
-    with open("$OUT_DIR/playwright.md", "w") as f:
+    with open(os.path.join(os.environ["SCRAPEKIT_OUT"], "playwright.md"), "w") as f:
         f.write(md)
 except Exception as e:
-    with open("$OUT_DIR/playwright.md", "w") as f:
+    with open(os.path.join(os.environ["SCRAPEKIT_OUT"], "playwright.md"), "w") as f:
         f.write(f"(failed: {e})")
 EOF
   [ -s "$OUT_DIR/playwright.md" ] || echo "(empty output)" > "$OUT_DIR/playwright.md"
@@ -95,11 +98,9 @@ EOF
 run_firecrawl() {
   echo "[5/8] firecrawl..."
   if command -v firecrawl &>/dev/null; then
-    timed_run firecrawl bash -c "
-      firecrawl scrape '$URL' --only-main-content -o '$OUT_DIR/firecrawl.md' 2>/dev/null \
-        || echo '(failed)' > '$OUT_DIR/firecrawl.md'
-      [ -s '$OUT_DIR/firecrawl.md' ] || echo '(empty output — check credits)' > '$OUT_DIR/firecrawl.md'
-    "
+    timed_run firecrawl bash -c '      firecrawl scrape "$SCRAPEKIT_URL" --only-main-content -o "$SCRAPEKIT_OUT/firecrawl.md" 2>"$SCRAPEKIT_OUT/runner.error.local.log" \
+        || echo '"'"'(failed)'"'"' > "$SCRAPEKIT_OUT/firecrawl.md"
+      [ -s "$SCRAPEKIT_OUT/firecrawl.md" ] || echo '"'"'(empty output — check credits)'"'"' > "$SCRAPEKIT_OUT/firecrawl.md"'
   else
     echo "0" > "$OUT_DIR/firecrawl.time"
     echo "(firecrawl not installed)" > "$OUT_DIR/firecrawl.md"
@@ -108,19 +109,19 @@ run_firecrawl() {
 
 run_crawl4ai() {
   echo "[6/8] crawl4ai..."
-  timed_run crawl4ai python3 - <<EOF
-import asyncio, warnings
+  timed_run crawl4ai python3 - <<'EOF'
+import asyncio, warnings, os
 warnings.filterwarnings("ignore")
 try:
     from crawl4ai import AsyncWebCrawler
     async def main():
         async with AsyncWebCrawler(verbose=False) as c:
-            r = await c.arun("$URL")
-            md = r.markdown or "(empty output)"
-            open("$OUT_DIR/crawl4ai.md", "w").write(md)
+            r = await c.arun(os.environ["SCRAPEKIT_URL"])
+            md = "HTTP " + str(getattr(r, "status_code", "unknown")) + "\n" + (r.markdown or "(empty output)")
+            open(os.path.join(os.environ["SCRAPEKIT_OUT"], "crawl4ai.md"), "w").write(md)
     asyncio.run(main())
 except Exception as e:
-    open("$OUT_DIR/crawl4ai.md", "w").write(f"(failed: {e})")
+    open(os.path.join(os.environ["SCRAPEKIT_OUT"], "crawl4ai.md"), "w").write(f"(failed: {e})")
 EOF
   [ -s "$OUT_DIR/crawl4ai.md" ] || echo "(empty output)" > "$OUT_DIR/crawl4ai.md"
 }
@@ -128,11 +129,9 @@ EOF
 run_webclaw() {
   echo "[7/8] webclaw..."
   if command -v webclaw &>/dev/null; then
-    timed_run webclaw bash -c "
-      webclaw '$URL' -f llm > '$OUT_DIR/webclaw.md' 2>/dev/null \
-        || echo '(failed)' > '$OUT_DIR/webclaw.md'
-      [ -s '$OUT_DIR/webclaw.md' ] || echo '(empty output)' > '$OUT_DIR/webclaw.md'
-    "
+    timed_run webclaw bash -c '      webclaw "$SCRAPEKIT_URL" -f llm > "$SCRAPEKIT_OUT/webclaw.md" 2>"$SCRAPEKIT_OUT/runner.error.local.log" \
+        || echo '"'"'(failed)'"'"' > "$SCRAPEKIT_OUT/webclaw.md"
+      [ -s "$SCRAPEKIT_OUT/webclaw.md" ] || echo '"'"'(empty output)'"'"' > "$SCRAPEKIT_OUT/webclaw.md"'
   else
     echo "0" > "$OUT_DIR/webclaw.time"
     echo "(webclaw not installed — cargo install --git https://github.com/0xMassi/webclaw.git webclaw-cli)" > "$OUT_DIR/webclaw.md"
@@ -142,19 +141,20 @@ run_webclaw() {
 run_tavily() {
   echo "[8/8] tavily..."
   if [ -n "${TAVILY_API_KEY:-}" ]; then
-    timed_run tavily python3 - <<EOF
+    timed_run tavily python3 - <<'EOF'
+import os
 try:
     from tavily import TavilyClient
-    client = TavilyClient(api_key="${TAVILY_API_KEY:-}")
-    r = client.extract("$URL")
+    client = TavilyClient(api_key=os.environ["TAVILY_API_KEY"])
+    r = client.extract(os.environ["SCRAPEKIT_URL"])
     results = r.get("results", [])
     if results:
         md = results[0].get("raw_content", "(empty)")
     else:
         md = "(no results returned)"
-    open("$OUT_DIR/tavily.md", "w").write(md)
+    open(os.path.join(os.environ["SCRAPEKIT_OUT"], "tavily.md"), "w").write(md)
 except Exception as e:
-    open("$OUT_DIR/tavily.md", "w").write(f"(failed: {e})")
+    open(os.path.join(os.environ["SCRAPEKIT_OUT"], "tavily.md"), "w").write(f"(failed: {e})")
 EOF
   else
     echo "0" > "$OUT_DIR/tavily.time"
@@ -163,14 +163,28 @@ EOF
   [ -s "$OUT_DIR/tavily.md" ] || echo "(empty output)" > "$OUT_DIR/tavily.md"
 }
 
+stop_if_blocked() {
+  if grep -qiE 'too many requests|rate.limit|HTTP(/[^ ]+)?[[:space:]]+429|captcha|challenge|checkpoint_required|verify you are human|cf-chl' "$OUT_DIR/$1.md" "$OUT_DIR/runner.error.local.log" "$OUT_DIR/response.headers.local" 2>/dev/null; then
+    echo "Stopped: rate limit or challenge; inspect private comparison output."
+    exit 1
+  fi
+}
 run_webfetch
+stop_if_blocked webfetch
 run_trafilatura
+stop_if_blocked trafilatura
 run_jina
+stop_if_blocked jina
 run_playwright
+stop_if_blocked playwright
 run_firecrawl
+stop_if_blocked firecrawl
 run_crawl4ai
+stop_if_blocked crawl4ai
 run_webclaw
+stop_if_blocked webclaw
 run_tavily
+stop_if_blocked tavily
 
 echo ""
 echo "==> Generating compare.html..."
@@ -233,7 +247,7 @@ cat > "$HTML" <<HTMLEOF
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>scrapekit compare — ${URL}</title>
+<title>scrapekit compare — ${DISPLAY_URL}</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #0f0f0f; color: #e0e0e0; }
@@ -262,7 +276,7 @@ cat > "$HTML" <<HTMLEOF
 <body>
 <header>
   <h1>scrapekit compare</h1>
-  <div class="url">${URL}</div>
+  <div class="url">${DISPLAY_URL}</div>
 </header>
 <div class="tabs">
   <div class="tab active" onclick="show(0)">

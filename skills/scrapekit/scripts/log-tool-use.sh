@@ -2,6 +2,7 @@
 # PostToolUse hook — appends one line to .scrapekit/session.log
 # Env: CLAUDE_TOOL_NAME, CLAUDE_TOOL_INPUT, CLAUDE_TOOL_OUTPUT (JSON)
 
+umask 077
 TOOL="${CLAUDE_TOOL_NAME:-unknown}"
 INPUT="${CLAUDE_TOOL_INPUT:-{}}"
 OUTPUT="${CLAUDE_TOOL_OUTPUT:-}"
@@ -26,6 +27,16 @@ esac
 # Only log into a .scrapekit/ that already exists — never create one.
 # The directory is the opt-in: scrapekit's skill creates it when invoked.
 [[ -d .scrapekit ]] || exit 0
+
+# Only sanitized URL identity reaches the log; historic logs still require review.
+TARGET=$(python3 - "$TARGET" <<'PYURL'
+import sys
+from urllib.parse import urlsplit,urlunsplit
+u=urlsplit(sys.argv[1]);print(urlunsplit((u.scheme,u.hostname or '',u.path,'','')))
+PYURL
+) || exit 0
+chmod 700 .scrapekit || exit 0
+if [[ -e "$LOG" ]]; then chmod 600 "$LOG" || exit 0; fi
 
 # Determine status from output
 OUTPUT_TEXT=$(echo "$OUTPUT" | jq -r '.content // .output // .' 2>/dev/null || echo "$OUTPUT")

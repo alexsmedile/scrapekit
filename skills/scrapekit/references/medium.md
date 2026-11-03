@@ -1,6 +1,8 @@
 # Medium Paywall Bypass
 
-Fetch paywalled Medium articles using free mirror services. Try services in order until one works.
+Use this when: recovering an accessible Medium article.
+
+Fetch paywalled Medium articles using free mirror services. Select another service only after ordinary unavailability; stop on challenges or rate limits.
 
 ## Service Priority
 
@@ -8,7 +10,7 @@ Fetch paywalled Medium articles using free mirror services. Try services in orde
 |---|---|---|---|---|---|
 | 1 | Freedium | `https://freedium.cfd/{encoded_url}` | Yes | Yes | Best option, returns full content directly |
 | 1b | Freedium mirror | `https://freedium-mirror.cfd/{encoded_url}` | Yes | Yes | Fallback when primary Freedium is down |
-| 2 | Archive.today | `https://archive.today/latest/{raw_url}` | No | Maybe | Often requires captcha — browser only |
+| 2 | Archive.today | `https://archive.today/latest/{raw_url}` | No | Maybe | Captcha requires stopping automatic attempts |
 | 3 | RemovePaywalls | `https://removepaywalls.com/{raw_url}` | No | No | Redirect page — needs browser rendering |
 | 4 | ReadMedium | `https://readmedium.com/en/{encoded_url}` | No | No | Returns 403 programmatically |
 
@@ -22,8 +24,8 @@ Fetch paywalled Medium articles using free mirror services. Try services in orde
 ```
 1. User provides a Medium URL
 2. Try Freedium via WebFetch
-3. If 4xx/5xx, bot-block, or < 200 tokens → try freedium-mirror.cfd
-4. If still blocked → use playwright / browser-harness for archive.today or removepaywalls.com
+3. If rate-limited or challenged → stop and report; do not switch tools/services
+4. For ordinary unavailable/empty content without denial, try one appropriate mirror or browser-rendered source
 5. Extract and present article content
 ```
 
@@ -86,7 +88,7 @@ These domains use Medium's paywall system and need the same bypass:
 trafilatura (fails on paywalled content)
   → Freedium via WebFetch
     → freedium-mirror.cfd via WebFetch
-      → curl -sL freedium (dangerouslyDisableSandbox if needed)
+      → bounded curl fetch of an available mirror (no challenge/rate-limit retry)
         → generic paywall bypass (see references/remove-paywall.md)
             → 12ft.io via WebFetch
             → archive.today via playwright / browser-harness
@@ -100,6 +102,6 @@ trafilatura (fails on paywalled content)
 | Freedium down | Try `freedium-mirror.cfd` — same URL pattern |
 | Article not found | Article may be too new to be cached yet |
 | Garbled HTML / sparse content | Add prompt: "Extract the article text and format as markdown" |
-| 403 / bot-blocked on WebFetch | Use `curl -sL` with `dangerouslyDisableSandbox: true` |
-| captcha on archive.today | Use playwright or browser-harness with real Chrome |
+| 403 / bot-blocked on WebFetch | Diagnose access denial; stop on challenge or rate limit. Do not disable sandboxing. |
+| captcha on archive.today | Stop automatic attempts; report the challenge for normal user resolution. |
 | < 200 tokens returned | Escalate to next service in chain |

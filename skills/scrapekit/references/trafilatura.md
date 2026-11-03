@@ -1,5 +1,7 @@
 # trafilatura — free, URL or local HTML
 
+Use this when: extracting clean text from static HTML or a bounded direct HTML fetch.
+
 Best token efficiency on SSR/static pages (3-5x cleaner than others). Hard fails on SPAs.
 
 ```bash

@@ -1,5 +1,7 @@
 # firecrawl — credits, last resort
 
+Use this when: local/free routes failed and an authorized Firecrawl route is selected.
+
 Check credits first: `firecrawl credit-usage`
 
 Self-hosted not worth it — requires Redis + Postgres + Playwright microservice. Use browser-harness for interactive login, playwright for local JS rendering. Firecrawl cloud credits for the rare hard case.

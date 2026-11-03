@@ -1,5 +1,7 @@
 # jina reader — free tier, JS rendering
 
+Use this when: the selected page or search route uses Jina.
+
 A page-reader alternative for YouTube page text and metadata. A historical
 benchmark returned 17k tokens; volume does not establish a complete transcript.
 Descriptions, comments and generated summaries are not spoken-content evidence.

@@ -43,6 +43,7 @@ No URL yet (need to search)?
   └─ Harness Search (WebSearch / search_web)  →  searxng (local Docker)  →  jina search (s.jina.ai)  →  firecrawl search
 
 Have a URL:
+  Google Docs HTML / mobilebasic      →  native reader → bounded direct HTTP + clean HTML extraction
   PDF / DOCX / PPTX / structured doc  →  docling
   Instagram post / reel / gallery     →  gallery-dl / yt-dlp → diagnose → conditional media fallbacks
   Login-gated / needs real cookies     →  browser-harness
@@ -74,6 +75,15 @@ Download, platform captions, local ASR and visual OCR are separate evidence rout
 Select a fallback by failure type and prerequisites, not a fixed retry-all chain.
 Keep raw evidence, hashes, source identity, language, coverage and attempt history;
 report fixture-tested, live-verified and dependency-missing routes separately.
+
+### Google Docs HTML recovery
+
+A native reader's internal error does not establish that a document is private.
+For a supplied Google Docs HTML/mobilebasic URL, try one bounded direct HTTP fetch
+unless the failure was a rate limit or challenge. Verify document text, not merely
+HTTP success or a login shell. Extract locally before printing; exclude scripts,
+styles and page chrome. Do not assume BeautifulSoup exists in the active Python.
+See [HTML extraction fallback](references/trafilatura.md#google-docs-and-local-html-fallback).
 
 ### Downloader cookies
 

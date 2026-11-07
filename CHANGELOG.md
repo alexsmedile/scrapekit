@@ -3,6 +3,11 @@
 All notable changes are documented here.
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
+## [Unreleased]
+
+### Fixed
+- Google Docs HTML recovery distinguishes native-reader errors from access denial and uses bounded direct fetching plus clean local extraction without assuming BeautifulSoup is installed.
+
 ## [1.6.1] — 2026-11-07
 
 ### Fixed

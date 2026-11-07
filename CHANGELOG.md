@@ -3,6 +3,11 @@
 All notable changes are documented here.
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
+## [1.6.1] — 2026-11-07
+
+### Fixed
+- yt-dlp and gallery-dl requests use the configured browser cookies for media, metadata and captions; anonymous retries require an explicit user request.
+
 ## [1.6.0] — 2026-11-04
 
 ### Added

@@ -1,6 +1,6 @@
 ---
 name: scrapekit
-version: 1.6.0
+version: 1.6.1
 description: |
   Proactive web scraping and document extraction router. Routes fetch/scrape tasks across webclaw, trafilatura, jina, playwright, tavily, apify, browser-harness, docling, searxng, and firecrawl based on source type, cost, and complexity. Use when user wants to fetch a URL, scrape a page, extract content from HTML/PDF/DOCX, convert to markdown or JSON, crawl a site, search the web, scrape social media (Instagram, TikTok, YouTube, LinkedIn, Twitter/X, Facebook, Reddit, Google Maps), scrape e-commerce (Amazon, Google Shopping), or needs full browser rendering. Triggers on: "fetch", "scrape", "get the page", "extract from", "convert to markdown", "crawl", "search the web", "parse PDF", "render page", "scrape instagram/tiktok/youtube/linkedin/twitter/facebook/reddit/amazon". Proactively picks the cheapest/fastest tool that can handle the job.
 allowed-tools: ["WebFetch", "Bash(trafilatura*)", "Bash(docling*)", "Bash(playwright*)", "Bash(markdownify*)", "Bash(python3*)", "Bash(firecrawl*)", "Bash(mkdir*)", "Bash(head*)", "Bash(grep*)", "Bash(jq*)", "Bash(curl*)", "Bash(docker*)", "Bash(browser-harness*)", "Bash(webclaw*)", "Bash(apify*)", "Bash(gallery-dl*)", "Bash(yt-dlp*)", "Bash(ffmpeg*)", "Bash(ffprobe*)"]
@@ -75,10 +75,21 @@ Select a fallback by failure type and prerequisites, not a fixed retry-all chain
 Keep raw evidence, hashes, source identity, language, coverage and attempt history;
 report fixture-tested, live-verified and dependency-missing routes separately.
 
+### Downloader cookies
+
+Both yt-dlp and gallery-dl must use explicit cookies from the configured existing
+browser/profile for media, metadata and native-caption requests. Resolve the
+session from configuration or established context; a public URL is not a reason
+to omit cookies. Diagnose missing/failed cookie access instead of starting
+anonymously. Never strip cookies or enable a public fallback automatically; a
+cookie-free attempt requires an explicit user request and the failure conditions
+in [media recovery](references/media-transcripts.md#diagnose-before-choosing-another-route).
+Keep the selected account and credentials private.
+
 ### Instagram acquisition and diagnosis
 
-- Use the owner's selected existing browser/profile for the first bounded CLI
-  attempt when that session is available and its use is authorized. Pass
+- Apply the downloader-cookie rule above to the first bounded CLI attempt and
+  any gallery-dl metadata discovery. Pass
   `--cookies-from-browser <browser>` explicitly; a visible browser login does not
   authenticate a downloader. Ignore global config (`gallery-dl --config-ignore`,
   `yt-dlp --ignore-config`) to prevent inherited paths and hooks from running.
@@ -98,9 +109,10 @@ report fixture-tested, live-verified and dependency-missing routes separately.
   official release; do not pin a stale version as a permanent universal minimum.
   Preserve separate private attempt logs and verify media after the repair.
 - A selected session can route Instagram through a different API endpoint.
-  If the exact source is already verified publicly readable and the authenticated
-  attempt fails with JSON/API parsing or a login redirect, allow one config-free
-  attempt without cookies before requiring sign-in. Preserve both results; this
+  If the user explicitly requests a cookie-free attempt, the exact source is
+  verified publicly readable and the authenticated attempt failed with JSON/API
+  parsing or a login redirect, allow one config-free attempt without cookies.
+  Otherwise preserve the selected cookie route and diagnose it. Keep both results; this
   does not prove cookies expired. Do not use this retry after a rate limit,
   challenge, cookie-decryption, network or TLS failure.
 - A connection timeout does
@@ -145,7 +157,7 @@ GitHub repo:                  playwright → jina → tavily → firecrawl
 SPA / React / Notion:         webclaw → playwright → jina → firecrawl
 YouTube media / captions:     yt-dlp / native captions → youtube-transcript-api / existing local ASR
 YouTube page metadata:        platform actor / page reader; inspect actual returned fields
-Instagram:                   gallery-dl / yt-dlp → diagnose → conditional public retry / independent extractor / browser
+Instagram:                   gallery-dl / yt-dlp → diagnose cookie route → independent extractor / browser
 other social media:          apify (platform actor)
 e-commerce / Amazon:          apify (junglee/amazon-crawler)
 quick / speed first:          webclaw → webfetch
@@ -168,7 +180,7 @@ search (no URL):              searxng → jina search → firecrawl search
 | GitHub repo | playwright | webclaw thin (1.8k), playwright complete (7.9k) |
 | YouTube video / transcript | yt-dlp / platform captions; youtube-transcript-api or configured local ASR | validate actual media or nonempty timed cues |
 | YouTube page / channel metadata | platform actor or jina | page text/description is not a spoken transcript; no guaranteed bot immunity |
-| Instagram posts / reels / mixed galleries | gallery-dl / yt-dlp; selected browser session when available | diagnose before conditional public retry; see media recovery protocol |
+| Instagram posts / reels / mixed galleries | gallery-dl / yt-dlp with selected browser cookies | diagnose the cookie route; see media recovery protocol |
 | TikTok / Facebook / LinkedIn / X | apify (platform actor) | — |
 | Reddit / Google Maps / Amazon | apify (platform actor) | — |
 | Gumroad product pages | jina | trafilatura errors, webclaw bot-blocked |

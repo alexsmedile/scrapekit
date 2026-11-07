@@ -27,11 +27,16 @@ and `/external/run-01` for a fresh configured capture destination.
    ```sh
    python3 "$SKILL_DIR/scripts/media_capture.py" \
      --source-url 'https://www.instagram.com/reel/SHORTCODE/' \
-     --download --audio --output /external/run-01 --execute
+     --download --audio --cookies-from-browser 'chrome:SELECTED_PROFILE' \
+     --output /external/run-01 --execute
    ```
 
-   Add `--cookies-from-browser 'chrome:SELECTED_PROFILE'` only for the owner's
-   selected authorized session. This invokes one config-free yt-dlp video attempt
+   Replace the illustrative browser/profile with the owner's configured existing
+   session. Both yt-dlp and gallery-dl require explicit cookies, including metadata
+   and native-caption requests. Missing/failed cookie access is a prerequisite to
+   diagnose, not permission to start anonymously. Only an explicit user request
+   permits a cookie-free attempt under the failure conditions below. This invokes
+   one config-free yt-dlp video attempt
    with a 60-second process budget, zero retries, metadata and archive. There is
    no automatic public retry, alternate extractor or account change. Read the
    failure category and apply the conditional recovery rules below. A video
@@ -120,8 +125,8 @@ ASR/OCR accuracy, full playback inspection or transfer to another video's style.
 
 | Need | First route | Conditional fallback |
 |---|---|---|
-| Video picture and sound | yt-dlp with global config disabled | One no-cookie attempt after authenticated API/login failure on an observed public source; independent extractor or observed browser media |
-| Ordered/mixed Instagram gallery | gallery-dl, metadata-derived membership and archive | Platform actor or browser capture; reconcile missing pages explicitly |
+| Video picture and sound | yt-dlp with selected browser cookies and global config disabled | Diagnose cookie route; independent extractor with the same selected session or observed browser media. No-cookie retry only on explicit user request and observed public access. |
+| Ordered/mixed Instagram gallery | gallery-dl with selected cookies for metadata and media, metadata-derived membership and archive | Platform actor or browser capture; reconcile missing pages explicitly |
 | Platform transcript | Exact-language published subtitle track, then explicitly selected automatic track | YouTube Transcript API on YouTube; local ASR when audio exists |
 | Speech from local media | Existing configured Whisper Python/model | Existing whisper.cpp runtime and compatible model; an alternate runtime is not independent accuracy evidence |
 | Visible text when audio is unavailable | OCR of timestamped frames | Visual inspection/correction; never label OCR as spoken transcript |
@@ -167,10 +172,12 @@ or unavailable, not acquisition success. Empty ASR does not establish silence.
 
 ## Diagnose before choosing another route
 
-- A browser session can select a broken authenticated API endpoint. On an exact
-  source already observed publicly readable, one config-free no-cookie attempt
-  after JSON/API parsing or login redirect can succeed. This does not prove an
-  expired session, nor authorize accessing private content without its session.
+- A browser session can select a broken authenticated API endpoint. Diagnose the
+  selected cookies/profile; do not automatically remove cookies after JSON/API
+  parsing errors or a login redirect. Only an explicit user request for a
+  cookie-free attempt, on an exact source observed publicly readable, permits one
+  config-free no-cookie attempt after that failure. This does not prove an expired
+  session or authorize accessing private content without its session.
 - Cookie-access/decryption failures, login redirects, API response errors, network
   timeouts, TLS failures, rate limits and challenges need separate diagnoses.
   Do not repeat a rate-limited/challenged request via another extractor/account.
